@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  articles      Article[]    @relation("AuthoredArticles")
+  editedArticles Article[]   @relation("EditedArticles")
+  roles         Role[]
+  discussions   Discussion[]
+  comments      Comment[]
+  reactions     Reaction[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Article {
+  id            String     @id @default(cuid())
+  title         String
+  content       String     @db.Text
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  authorId      String
+  author        User       @relation("AuthoredArticles", fields: [authorId], references: [id])
+  editors       User[]     @relation("EditedArticles")
+  roles         Role[]
+  isPublic      Boolean    @default(true)
+  discussions   Discussion[]
+  revisions     Revision[]
+  category      Category?  @relation(fields: [categoryId], references: [id])
+  categoryId    String?
+  comments      Comment[]
+}
+
+model Revision {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id])
+  articleId String
+}
+
+model Role {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  users       User[]
+  articles    Article[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  articles    Article[]
+  parentId    String?
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+}
+
+model Discussion {
+  id        String    @id @default(cuid())
+  title     String
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  articleId String?
+  article   Article?  @relation(fields: [articleId], references: [id])
+  comments  Comment[]
+  tags      Tag[]
+  isPinned  Boolean   @default(false)
+  isLocked  Boolean   @default(false)
+}
+
+model Comment {
+  id           String     @id @default(cuid())
+  content      String     @db.Text
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  authorId     String
+  author       User       @relation(fields: [authorId], references: [id])
+  discussionId String?
+  discussion   Discussion? @relation(fields: [discussionId], references: [id])
+  articleId    String?
+  article      Article?   @relation(fields: [articleId], references: [id])
+  parentId     String?
+  parent       Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  replies      Comment[]  @relation("CommentReplies")
+  reactions    Reaction[]
+}
+
+model Tag {
+  id           String       @id @default(cuid())
+  name         String       @unique
+  discussions  Discussion[]
+}
+
+model Reaction {
+  id         String   @id @default(cuid())
+  type       String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  commentId  String
+  comment    Comment  @relation(fields: [commentId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, commentId, type])
+} 

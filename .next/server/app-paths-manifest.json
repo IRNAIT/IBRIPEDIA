@@ -1,0 +1,9 @@
+{
+  "/not-found": "app/not-found.js",
+  "/page": "app/page.js",
+  "/discussions/page": "app/discussions/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/articles/new/page": "app/articles/new/page.js",
+  "/api/discussions/route": "app/api/discussions/route.js",
+  "/discussions/new/page": "app/discussions/new/page.js"
+}
