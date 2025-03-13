@@ -1,3 +1,5 @@
+"use client"
+
 import { Article, User, Category } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
