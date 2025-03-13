@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
+import { useSession, signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { formatDistanceToNow } from "date-fns"
 import { ru } from "date-fns/locale"
@@ -18,18 +18,39 @@ interface Comment {
 }
 
 interface CommentsProps {
-  comments: Comment[]
-  discussionId?: string
   articleId?: string
-  onCommentAdded: () => void
+  discussionId?: string
 }
 
-export function Comments({ comments, discussionId, articleId, onCommentAdded }: CommentsProps) {
+export function Comments({ articleId, discussionId }: CommentsProps) {
   const { data: session } = useSession()
+  const [comments, setComments] = useState<Comment[]>([])
   const [content, setContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [replyTo, setReplyTo] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`/api/comments?articleId=${articleId}&discussionId=${discussionId}`)
+        if (!response.ok) {
+          throw new Error("Не удалось загрузить комментарии")
+        }
+        const data = await response.json()
+        setComments(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Произошла ошибка")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (articleId || discussionId) {
+      fetchComments()
+    }
+  }, [articleId, discussionId])
 
   const handleSubmit = async (e: React.FormEvent, parentId?: string) => {
     e.preventDefault()
@@ -57,9 +78,10 @@ export function Comments({ comments, discussionId, articleId, onCommentAdded }: 
         throw new Error("Не удалось добавить комментарий")
       }
 
+      const newComment = await response.json()
+      setComments(prev => [...prev, newComment])
       setContent("")
       setReplyTo(null)
-      onCommentAdded()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка")
     } finally {
@@ -140,6 +162,14 @@ export function Comments({ comments, discussionId, articleId, onCommentAdded }: 
             {comment.replies.map((reply) => renderComment(reply, level + 1))}
           </div>
         )}
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     )
   }

@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: 'standalone',
   images: {
-    domains: ['avatars.githubusercontent.com', 'cdn.discordapp.com'],
-    unoptimized: true,
+    domains: ['avatars.githubusercontent.com', 'lh3.googleusercontent.com', 'cdn.discordapp.com'],
   },
   basePath: '/IBRIPEDIA',
 }

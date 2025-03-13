@@ -20,7 +20,7 @@ export default function TestEditorPage() {
           <Button onClick={handleSave}>Сохранить</Button>
         </div>
         <div className="bg-white/5 backdrop-blur-sm rounded-lg p-6">
-          <RichTextEditor value={content} onChange={setContent} />
+          <RichTextEditor initialContent={content} onChange={setContent} />
         </div>
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Предпросмотр:</h2>

@@ -133,7 +133,7 @@ export default function NewArticlePage() {
             Содержание
           </label>
           <RichTextEditor
-            value={content}
+            initialContent={content}
             onChange={setContent}
           />
         </div>

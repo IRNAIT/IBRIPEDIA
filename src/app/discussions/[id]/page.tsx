@@ -133,11 +133,7 @@ export default function DiscussionPage({ params }: { params: { id: string } }) {
           />
         </div>
         <div className="mt-12">
-          <Comments
-            comments={comments}
-            discussionId={discussion.id}
-            onCommentAdded={fetchComments}
-          />
+          <Comments discussionId={discussion.id} />
         </div>
       </div>
     </div>

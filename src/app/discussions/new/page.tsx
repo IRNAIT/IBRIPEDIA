@@ -107,7 +107,7 @@ export default function NewDiscussionPage() {
             Содержание
           </label>
           <RichTextEditor
-            value={content}
+            initialContent={content}
             onChange={setContent}
           />
         </div>
